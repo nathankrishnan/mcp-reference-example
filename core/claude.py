@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import Optional
 from anthropic import Anthropic
 from anthropic.types import Message, MessageParam, TextBlockParam, ToolUnionParam
 
@@ -19,14 +19,14 @@ class Claude:
         self.model = model
 
     def add_user_message(
-        self, messages: List[MessageParam], message: Union[str, Message]
+        self, messages: list[MessageParam], message: str | Message
     ) -> None:
         """
         Append a user message to the conversation history.
 
         Args:
-            messages (List[MessageParam]): The current list of conversation messages.
-            message (Union[str, Message]): The text content or a Message object to add as the user.
+            messages (list[MessageParam]): The current list of conversation messages.
+            message (str | Message): The text content or a Message object to add as the user.
         """
         user_message: MessageParam = {
             "role": "user",
@@ -36,14 +36,14 @@ class Claude:
         messages.append(user_message)
 
     def add_assistant_message(
-        self, messages: List[MessageParam], message: Union[str, Message]
+        self, messages: list[MessageParam], message: str | Message
     ) -> None:
         """
         Append an assistant message to the conversation history.
 
         Args:
-            messages (List[MessageParam]): The current list of conversation messages.
-            message (Union[str, Message]): The text content or a Message object to add as the assistant.
+            messages (list[MessageParam]): The current list of conversation messages.
+            message (str | Message): The text content or a Message object to add as the assistant.
         """
         assistant_message: MessageParam = {
             "role": "assistant",
@@ -68,11 +68,11 @@ class Claude:
 
     def chat(
         self,
-        messages: List[MessageParam],
-        system: Optional[Union[str, List[TextBlockParam]]] = None,
+        messages: list[MessageParam],
+        system: Optional[str | list[TextBlockParam]] = None,
         temperature: float = 1.0,
-        stop_sequences: Optional[List[str]] = None,
-        tools: Optional[List[ToolUnionParam]] = None,
+        stop_sequences: Optional[list[str]] = None,
+        tools: Optional[list[ToolUnionParam]] = None,
         thinking: bool = False,
         thinking_budget: int = 1024,
     ) -> Message:
@@ -80,11 +80,11 @@ class Claude:
         Send a chat completion request to the Anthropic API.
 
         Args:
-            messages (List[MessageParam]): The conversation history.
-            system (Optional[Union[str, List[TextBlockParam]]], optional): System prompt to guide the model's behavior. Defaults to None.
+            messages (list[MessageParam]): The conversation history.
+            system (Optional[str | list[TextBlockParam]], optional): System prompt to guide the model's behavior. Defaults to None.
             temperature (float, optional): Randomness of the output (0.0 to 1.0). Defaults to 1.0.
-            stop_sequences (Optional[List[str]], optional): Custom sequences that stop generation. Defaults to None.
-            tools (Optional[List[ToolUnionParam]], optional): JSON schemas defining available tools. Defaults to None.
+            stop_sequences (Optional[list[str]], optional): Custom sequences that stop generation. Defaults to None.
+            tools (Optional[list[ToolUnionParam]], optional): JSON schemas defining available tools. Defaults to None.
             thinking (bool, optional): Whether to enable the model's extended thinking mode. Defaults to False.
             thinking_budget (int, optional): Minimum tokens reserved for thinking (if enabled). Defaults to 1024.
 
