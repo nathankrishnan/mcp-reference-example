@@ -1,5 +1,5 @@
 import json
-from typing import Any, Optional, Literal
+from typing import Any, Literal
 from client.mcp_client import MCPClient
 from mcp.types import TextContent
 from anthropic.types import Message, ToolResultBlockParam
@@ -37,29 +37,27 @@ class ToolManager:
         return tools
 
     @classmethod
-    async def _find_client_with_tool(
+    async def build_tool_client_map(
         cls,
-        clients: list[MCPClient],
-        tool_name: str,
-    ) -> Optional[MCPClient]:
+        clients: dict[str, MCPClient],
+    ) -> dict[str, MCPClient]:
         """
-        Finds the first client that has the specified tool.
+        Builds a mapping from tool name to the client that provides it.
 
         Args:
-            clients (list[MCPClient]): A list of MCPClient instances to search.
-            tool_name (str): The name of the tool to search for.
+            clients (dict[str, MCPClient]): A dictionary mapping client names to MCPClient instances.
 
         Returns:
-            Optional[MCPClient]: The first client that provides the specific tool, or None if no such client is found.
+            dict[str, MCPClient]: A mapping from tool name to the MCPClient that provides it.
         """
-        for client in clients:
+        tool_client_map: dict[str, MCPClient] = {}
+
+        for client in clients.values():
             tools = await client.list_tools()
+            for tool in tools:
+                tool_client_map[tool.name] = client
 
-            tool = next((t for t in tools if t.name == tool_name), None)
-            if tool:
-                return client
-
-        return None
+        return tool_client_map
 
     @classmethod
     def _build_tool_result_part(
@@ -88,13 +86,15 @@ class ToolManager:
 
     @classmethod
     async def execute_tool_requests(
-        cls, clients: dict[str, MCPClient], message: Message
+        cls,
+        tool_client_map: dict[str, MCPClient],
+        message: Message,
     ) -> list[ToolResultBlockParam]:
         """
         Executes a list of tool requests against the provided clients.
 
         Args:
-            clients (dict[str, MCPClient]): A dictionary mapping client names to MCPClient instances.
+            tool_client_map (dict[str, MCPClient]): A mapping from tool name to the MCPClient that provides it.
             message (Message): The message containing the tool requests.
 
         Returns:
@@ -108,7 +108,7 @@ class ToolManager:
             tool_name = tool_request.name
             tool_input = tool_request.input
 
-            client = await cls._find_client_with_tool(list(clients.values()), tool_name)
+            client = tool_client_map.get(tool_name)
 
             if not client:
                 tool_result_part = cls._build_tool_result_part(

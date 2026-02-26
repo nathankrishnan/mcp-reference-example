@@ -39,15 +39,15 @@ async def test_get_all_tools(mock_client_1, mock_client_2):
     assert tools[1]["name"] == "tool_2"
 
 
-async def test_find_client_with_tool(mock_client_1, mock_client_2):
-    """Test finding a specific client that provides a given tool."""
-    clients = [mock_client_1, mock_client_2]
+async def test_build_tool_client_map(mock_client_1, mock_client_2):
+    """Test building a tool name to client mapping."""
+    clients = {"c1": mock_client_1, "c2": mock_client_2}
 
-    found_client = await ToolManager._find_client_with_tool(clients, "tool_2")
-    assert found_client == mock_client_2
+    tool_map = await ToolManager.build_tool_client_map(clients)
 
-    not_found = await ToolManager._find_client_with_tool(clients, "tool_3")
-    assert not_found is None
+    assert tool_map["tool_1"] == mock_client_1
+    assert tool_map["tool_2"] == mock_client_2
+    assert "tool_3" not in tool_map
 
 
 def test_build_tool_result_part():
@@ -75,9 +75,9 @@ async def test_execute_tool_requests_not_found(mock_client_1):
     tool_req.input = {}
     message.content = [tool_req]
 
-    clients = {"c1": mock_client_1}
+    tool_client_map = {"tool_1": mock_client_1}
 
-    results = await ToolManager.execute_tool_requests(clients, message)
+    results = await ToolManager.execute_tool_requests(tool_client_map, message)
 
     assert len(results) == 1
     assert results[0]["is_error"] is True
@@ -95,7 +95,7 @@ async def test_execute_tool_requests_success(mock_client_1):
     tool_req.input = {"param": "value"}
     message.content = [tool_req]
 
-    clients = {"c1": mock_client_1}
+    tool_client_map = {"tool_1": mock_client_1}
 
     # Setup the client's tool call return
     call_result = MagicMock(spec=CallToolResult)
@@ -108,7 +108,7 @@ async def test_execute_tool_requests_success(mock_client_1):
 
     mock_client_1.call_tool = AsyncMock(return_value=call_result)
 
-    results = await ToolManager.execute_tool_requests(clients, message)
+    results = await ToolManager.execute_tool_requests(tool_client_map, message)
 
     assert len(results) == 1
     assert results[0]["is_error"] is False
@@ -126,12 +126,12 @@ async def test_execute_tool_requests_exception(mock_client_1):
     tool_req.input = {}
     message.content = [tool_req]
 
-    clients = {"c1": mock_client_1}
+    tool_client_map = {"tool_1": mock_client_1}
 
     # Force call_tool to raise an Exception
     mock_client_1.call_tool = AsyncMock(side_effect=Exception("Network error"))
 
-    results = await ToolManager.execute_tool_requests(clients, message)
+    results = await ToolManager.execute_tool_requests(tool_client_map, message)
 
     assert len(results) == 1
     assert results[0]["is_error"] is True
