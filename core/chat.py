@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class Chat:
     """
-    Manages a multi-turn conversation with Claude, including agentic tool-use loops.
+    Manages a conversation with Claude, handling agentic tool-use loops for each query.
     """
 
     def __init__(self, claude_service: Claude, clients: dict[str, MCPClient]):
@@ -43,7 +43,7 @@ class Chat:
         Raises:
             RuntimeError: If the loop exceeds max_iterations without producing a final response.
         """
-        self.messages.append({"role": "user", "content": query})
+        self.claude_service.add_user_message(self.messages, query)
 
         tools = await ToolManager.get_all_tools(self.clients)
         tool_client_map = await ToolManager.build_tool_client_map(self.clients)

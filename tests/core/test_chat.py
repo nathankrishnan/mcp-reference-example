@@ -46,8 +46,7 @@ async def test_run_appends_user_message(mock_claude, mock_clients):
     chat = Chat(claude_service=mock_claude, clients=mock_clients)
     await chat.run("Hello")
 
-    assert len(chat.messages) >= 1
-    assert chat.messages[0] == {"role": "user", "content": "Hello"}
+    mock_claude.add_user_message.assert_any_call(chat.messages, "Hello")
 
 
 async def test_run_returns_final_text(mock_claude, mock_clients):
