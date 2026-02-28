@@ -25,6 +25,15 @@ class Chat:
         self.clients = clients
         self.messages: list[MessageParam] = []
 
+    async def _process_query(self, query: str):
+        """
+        Process a user query and add it to the conversation history.
+
+        Args:
+            query (str): The user's input message.
+        """
+        self.claude_service.add_user_message(self.messages, query)
+
     async def run(
         self,
         query: str,
@@ -43,7 +52,7 @@ class Chat:
         Raises:
             RuntimeError: If the loop exceeds max_iterations without producing a final response.
         """
-        self.claude_service.add_user_message(self.messages, query)
+        await self._process_query(query)
 
         tools = await ToolManager.get_all_tools(self.clients)
         tool_client_map = await ToolManager.build_tool_client_map(self.clients)
