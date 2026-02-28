@@ -269,6 +269,9 @@ class CliApp:
                 if not user_input.strip():
                     continue
 
+                if user_input.strip() in (":q", ":quit"):
+                    break
+
                 response = await self.agent.run(user_input)
                 print(f"\nResponse:\n{response}")
 

@@ -273,3 +273,21 @@ async def test_run_exits_on_keyboard_interrupt(cli_app, mock_agent):
     await cli_app.run()
 
     mock_agent.run.assert_not_called()
+
+
+async def test_run_exits_on_colon_q(cli_app, mock_agent):
+    """Test that run() exits when user types :q."""
+    cli_app.session.prompt_async = AsyncMock(return_value=":q")
+
+    await cli_app.run()
+
+    mock_agent.run.assert_not_called()
+
+
+async def test_run_exits_on_colon_quit(cli_app, mock_agent):
+    """Test that run() exits when user types :quit."""
+    cli_app.session.prompt_async = AsyncMock(return_value=":quit")
+
+    await cli_app.run()
+
+    mock_agent.run.assert_not_called()
