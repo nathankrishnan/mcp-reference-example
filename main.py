@@ -1,6 +1,61 @@
-def main():
-    print("Hello from mcp-chat-reference-example!")
+import os
+import sys
+import asyncio
+from contextlib import AsyncExitStack
+
+from client.mcp_client import MCPClient
+from core.claude import Claude
+from core.cli_chat import CliChat
+from core.cli import CliApp
+
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
+# Anthropic Config
+claude_model = os.getenv("CLAUDE_MODEL", "")
+anthropic_api_key = os.getenv("ANTHROPIC_API_KEY", "")
+
+
+assert claude_model, "Error: CLAUDE_MODEL cannot be empty. Update .env"
+assert anthropic_api_key, "Error: ANTHROPIC_API_KEY cannot be empty. Update .env"
+
+
+async def main():
+    claude_service = Claude(model=claude_model)
+    server_scripts = sys.argv[1:]
+    clients = {}
+
+    command, args = (
+        ("uv", ["run", "server/mcp_server.py"])
+        if os.getenv("USE_UV", "0") == "1"
+        else ("python", ["server/mcp_server.py"])
+    )
+
+    async with AsyncExitStack() as stack:
+        doc_client = await stack.enter_async_context(
+            MCPClient(command=command, args=args)
+        )
+        clients["doc_client"] = doc_client
+
+        for i, server_script in enumerate(server_scripts):
+            client_id = f"client_{i}_{server_script}"
+            client = await stack.enter_async_context(
+                MCPClient(command="uv", args=["run", server_script])
+            )
+            clients[client_id] = client
+
+        chat = CliChat(
+            doc_client=doc_client,
+            clients=clients,
+            claude_service=claude_service,
+        )
+
+        cli = CliApp(chat)
+        await cli.initialize()
+        await cli.run()
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
