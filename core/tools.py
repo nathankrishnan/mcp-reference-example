@@ -106,7 +106,7 @@ class ToolManager:
         for tool_request in tool_requests:
             tool_use_id = tool_request.id
             tool_name = tool_request.name
-            tool_input = tool_request.input
+            tool_arguments = tool_request.input
 
             client = tool_client_map.get(tool_name)
 
@@ -118,7 +118,7 @@ class ToolManager:
                 continue
 
             try:
-                tool_output = await client.call_tool(tool_name, tool_input)
+                tool_output = await client.call_tool(tool_name, tool_arguments)
 
                 items = []
                 if tool_output:

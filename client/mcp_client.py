@@ -100,24 +100,23 @@ class MCPClient:
         Returns:
             list[types.Tool]: A list of Tool objects defined by the server.
         """
-        # TODO: Return a list of tools defined by the MCP server
-        return []
+        result = await self.session().list_tools()
+        return result.tools
 
     async def call_tool(
-        self, tool_name: str, tool_input: dict
+        self, tool_name: str, arguments: dict
     ) -> types.CallToolResult | None:
         """
-        Invoke a specific tool on the MCP server with the given input.
+        Invoke a specific tool on the MCP server with the given arguments.
 
         Args:
             tool_name (str): The name of the tool to call.
-            tool_input (dict): A dictionary of arguments to pass to the tool.
+            arguments (dict): A dictionary of arguments to pass to the tool.
 
         Returns:
             types.CallToolResult | None: The result returned by the tool, or None.
         """
-        # TODO: Call a particular tool and return the result
-        return None
+        return await self.session().call_tool(tool_name, arguments)
 
     async def list_prompts(self) -> list[types.Prompt]:
         """
@@ -158,9 +157,10 @@ class MCPClient:
 async def main():
     async with MCPClient(
         command="uv",
-        args=["run", "mcp_server.py"],
+        args=["run", "server/mcp_server.py"],
     ) as _client:
-        pass
+        result = await _client.list_tools()
+        print(result)
 
 
 if __name__ == "__main__":
