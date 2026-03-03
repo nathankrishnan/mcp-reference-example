@@ -127,8 +127,8 @@ class MCPClient:
         Returns:
             list[types.Prompt]: A list of Prompt objects defined by the server.
         """
-        # TODO: Return a list of prompts defined by the MCP server
-        return []
+        result = await self.session().list_prompts()
+        return result.prompts
 
     async def get_prompt(self, prompt_name: str, args: dict[str, str]):
         """
@@ -138,8 +138,8 @@ class MCPClient:
             prompt_name (str): The name of the prompt to retrieve.
             args (dict[str, str]): Key-value pairs used to fill in the prompt's variables.
         """
-        # TODO: Get a particular prompt defined by the MCP server
-        return []
+        result = await self.session().get_prompt(name=prompt_name, arguments=args)
+        return result.messages
 
     async def read_resource(self, uri: str) -> Any:
         """
