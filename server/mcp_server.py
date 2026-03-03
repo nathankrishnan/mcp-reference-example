@@ -79,7 +79,20 @@ def format_document(
     return [base.UserMessage(prompt)]
 
 
-# TODO: Write a prompt to summarize a doc
+@mcp.prompt(name="summarize", description="Summarizes the contents of a document.")
+def summarize_document(
+    doc_id: str = Field(description="Id of the document to summarize"),
+) -> list[base.Message]:
+    prompt = f"""
+    Retrieve the following document using the 'read_doc_contents' tool:
+    <document_id>
+    {doc_id}
+    </document_id>
+
+    Then summarize the document in a single short paragraph that captures its
+    purpose, key findings, and any action items.
+    """
+    return [base.UserMessage(prompt)]
 
 
 if __name__ == "__main__":
