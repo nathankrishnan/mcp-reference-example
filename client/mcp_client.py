@@ -106,19 +106,19 @@ class MCPClient:
         return result.tools
 
     async def call_tool(
-        self, tool_name: str, arguments: dict
+        self, tool_name: str, args: dict[str, Any]
     ) -> types.CallToolResult | None:
         """
         Invoke a specific tool on the MCP server with the given arguments.
 
         Args:
             tool_name (str): The name of the tool to call.
-            arguments (dict): A dictionary of arguments to pass to the tool.
+            args (dict[str, Any]): A dictionary of arguments to pass to the tool.
 
         Returns:
             types.CallToolResult | None: The result returned by the tool, or None.
         """
-        return await self.session().call_tool(tool_name, arguments)
+        return await self.session().call_tool(name=tool_name, arguments=args)
 
     async def list_prompts(self) -> list[types.Prompt]:
         """

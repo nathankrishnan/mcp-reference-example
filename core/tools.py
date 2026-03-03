@@ -118,7 +118,7 @@ class ToolManager:
                 continue
 
             try:
-                tool_output = await client.call_tool(tool_name, tool_arguments)
+                tool_output = await client.call_tool(tool_name, args=tool_arguments)
 
                 items = []
                 if tool_output:
